@@ -158,7 +158,6 @@ describe('PaypalCommercePaymentStrategy', () => {
                     'buttons',
                     'messages',
                     'fields',
-                    'funding-eligibility',
                 ],
             };
 
@@ -184,7 +183,6 @@ describe('PaypalCommercePaymentStrategy', () => {
                     'buttons',
                     'messages',
                     'fields',
-                    'funding-eligibility',
                 ],
             };
 
@@ -204,7 +202,7 @@ describe('PaypalCommercePaymentStrategy', () => {
             expect(output).toEqual(store.getState());
         });
 
-        it("doesn't initialize paypalCommercePaymentProcessor if orderId is not undefined", async () => {
+        it('not initialize paypalCommercePaymentProcessor if orderId is not undefined', async () => {
             jest.spyOn(store.getState().paymentMethods, 'getPaymentMethodOrThrow')
                 .mockReturnValue({ ...getPaypalCommerce() });
 
@@ -213,7 +211,7 @@ describe('PaypalCommercePaymentStrategy', () => {
             expect(paypalCommercePaymentProcessor.initialize).not.toHaveBeenCalled();
         });
 
-        it('initializes paypalCommercePaymentProcessor if orderId is undefined', async () => {
+        it('initialize paypalCommercePaymentProcessor if orderId is undefined', async () => {
             await paypalCommercePaymentStrategy.initialize(options);
 
             const obj = {
@@ -225,37 +223,13 @@ describe('PaypalCommercePaymentStrategy', () => {
                     'buttons',
                     'messages',
                     'fields',
-                    'funding-eligibility',
                 ],
             };
 
             expect(paypalCommercePaymentProcessor.initialize).toHaveBeenCalledWith(obj, undefined, undefined);
         });
 
-        it('initializes paypalCommercePaymentProcessor with enable-funding field for enabling APM in restricted countries with correct billing address', async () => {
-            jest.spyOn(paypalCommerceFundingKeyResolver, 'resolve')
-                .mockReturnValue('P24');
-
-            await paypalCommercePaymentStrategy.initialize({ ...options, gatewayId: PaymentStrategyType.PAYPAL_COMMERCE_ALTERNATIVE_METHODS, methodId: 'przelewy24' });
-
-            const obj = {
-                'client-id': 'abc',
-                commit: true,
-                currency: 'USD',
-                intent: 'capture',
-                components: [
-                    'buttons',
-                    'messages',
-                    'fields',
-                    'funding-eligibility',
-                ],
-                'enable-funding': 'przelewy24',
-            };
-
-            expect(paypalCommercePaymentProcessor.initialize).toHaveBeenCalledWith(obj, undefined, 'paypalcommercealternativemethods');
-        });
-
-        it('renders PayPal button if orderId is undefined', async () => {
+        it('render PayPal button if orderId is undefined', async () => {
             await paypalCommercePaymentStrategy.initialize(options);
 
             const buttonOption = {
@@ -275,7 +249,7 @@ describe('PaypalCommercePaymentStrategy', () => {
             );
         });
 
-        it('renders Credit PayPal button if orderId is undefined', async () => {
+        it('render Credit PayPal button if orderId is undefined', async () => {
             jest.spyOn(paypalCommerceFundingKeyResolver, 'resolve')
                 .mockReturnValue('PAYLATER');
 
@@ -300,7 +274,7 @@ describe('PaypalCommercePaymentStrategy', () => {
             );
         });
 
-        it('renders Przelewy24 button if orderIdis undefined and methodId is przelewy24', async () => {
+        it('render Przelewy24 button if orderIdis undefined and methodId is przelewy24', async () => {
             jest.spyOn(paypalCommerceFundingKeyResolver, 'resolve')
                 .mockReturnValue('P24');
 
@@ -319,7 +293,7 @@ describe('PaypalCommercePaymentStrategy', () => {
                 );
         });
 
-        it('renders Przelewy24 fields if orderIdis undefined and methodId is przelewy24', async () => {
+        it('render Przelewy24 fields if orderIdis undefined and methodId is przelewy24', async () => {
             jest.spyOn(paypalCommerceFundingKeyResolver, 'resolve')
                 .mockReturnValue('P24');
 
@@ -336,7 +310,7 @@ describe('PaypalCommercePaymentStrategy', () => {
                 });
         });
 
-        it("throws an error if apmFieldsContainer wasn't provided when trying to initialize Przelewy24 method", async () => {
+        it("throw an error if apmFieldsContainer wasn't provided when trying to initialize Przelewy24 method", async () => {
             jest.spyOn(paypalCommerceFundingKeyResolver, 'resolve')
                 .mockReturnValue('P24');
             paypalcommerceOptions.apmFieldsContainer = undefined;
@@ -348,7 +322,7 @@ describe('PaypalCommercePaymentStrategy', () => {
             }
         });
 
-        it('calls submitForm after approve', async () => {
+        it('call submitForm after approve', async () => {
             await paypalCommercePaymentStrategy.initialize(options);
 
             eventEmitter.emit('onApprove');
@@ -358,7 +332,7 @@ describe('PaypalCommercePaymentStrategy', () => {
             expect(submitForm).toHaveBeenCalled();
         });
 
-        it('calls onValidate onclick', async () => {
+        it('call onValidate onclick', async () => {
             await paypalCommercePaymentStrategy.initialize(options);
 
             eventEmitter.emit('onClick');
@@ -366,7 +340,7 @@ describe('PaypalCommercePaymentStrategy', () => {
             expect(paypalcommerceOptions.onValidate).toHaveBeenCalled();
         });
 
-        it('shows loader if validation is passed onclick', async () => {
+        it('show loader if validation is passed onclick', async () => {
             await paypalCommercePaymentStrategy.initialize(options);
 
             eventEmitter.emit('onClick');
@@ -374,7 +348,7 @@ describe('PaypalCommercePaymentStrategy', () => {
             expect(loader.show).toHaveBeenCalled();
         });
 
-        it('throws error if paypalcommerce is undefined', async () => {
+        it('throw error if paypalcommerce is undefined', async () => {
             const expectedError = new InvalidArgumentError('Unable to initialize payment because "options.paypalcommerce" argument is not provided.');
 
             try {
@@ -395,7 +369,7 @@ describe('PaypalCommercePaymentStrategy', () => {
                 .mockReturnValue({ ...getPaypalCommerce() });
         });
 
-        it('passes the options to submitOrder', async () => {
+        it('pass the options to submitOrder', async () => {
             await paypalCommercePaymentStrategy.initialize(options);
             await paypalCommercePaymentStrategy.execute(orderRequestBody, options);
 
@@ -409,7 +383,7 @@ describe('PaypalCommercePaymentStrategy', () => {
             expect(store.dispatch).toHaveBeenCalledWith(submitOrderAction);
         });
 
-        it('submits Payment with orderId and method_id if method is paypalcommerce', async () => {
+        it('submitPayment with orderId and method_id if method is paypalcommerce', async () => {
             const expected = {
                 ...orderRequestBody.payment,
                 paymentData: {
@@ -431,7 +405,7 @@ describe('PaypalCommercePaymentStrategy', () => {
             expect(paymentActionCreator.submitPayment).toHaveBeenCalledWith(expected);
         });
 
-        it('submits Payment with orderId and method_id if method is alternative', async () => {
+        it('submitPayment with orderId and method_id if method is alternative', async () => {
             jest.spyOn(store.getState().paymentMethods, 'getPaymentMethodOrThrow')
                 .mockReturnValue({ ...getPaypalCommerce(), id: 'przelewy24', gatewayId: PaymentStrategyType.PAYPAL_COMMERCE_ALTERNATIVE_METHODS });
 
@@ -470,7 +444,7 @@ describe('PaypalCommercePaymentStrategy', () => {
             expect(store.dispatch).toHaveBeenCalledWith(submitPaymentAction);
         });
 
-        it('throws error without payment data', async () => {
+        it('throw error without payment data', async () => {
             orderRequestBody.payment = undefined;
 
             await paypalCommercePaymentStrategy.initialize(options);
@@ -482,7 +456,7 @@ describe('PaypalCommercePaymentStrategy', () => {
             }
         });
 
-        it('throws error without orderId', async () => {
+        it('throw error without orderId', async () => {
             orderID = '';
 
             try {
